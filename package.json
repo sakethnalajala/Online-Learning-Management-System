@@ -1,0 +1,27 @@
+{
+  "name": "lumina-lms",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Online Learning Management System - MERN full-stack (React + Vite + Tailwind, Node + Express, MongoDB Atlas)",
+  "scripts": {
+    "install:all": "npm --prefix server install && npm --prefix client install",
+    "seed": "npm --prefix server run seed",
+    "seed:fresh": "npm --prefix server run seed:fresh",
+    "dev:server": "npm --prefix server run dev",
+    "dev:client": "npm --prefix client run dev",
+    "start:server": "npm --prefix server start",
+    "build:client": "npm --prefix client run build",
+    "preview:client": "npm --prefix client run preview",
+    "test:workflow": "node scripts/workflow-test.js",
+    "test:authoring": "node scripts/authoring-test.js",
+    "test:api": "node scripts/workflow-test.js && node scripts/authoring-test.js && node scripts/security-test.js",
+    "test:security": "node scripts/security-test.js",
+    "test:ui": "node scripts/ui-test.js",
+    "test:all": "npm run test:api && npm run test:ui",
+    "migrate:atlas": "node scripts/migrate-to-atlas.js",
+    "migrate:atlas:apply": "node scripts/migrate-to-atlas.js --apply"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

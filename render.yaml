@@ -1,0 +1,68 @@
+# Render Blueprint for the Lumina LMS API.
+#
+# Deploy with: Render dashboard -> New -> Blueprint -> point at this repo.
+# MONGO_URI and JWT secrets are marked sync:false, so Render prompts for them
+# rather than storing them in the repository.
+services:
+  - type: web
+    name: lumina-lms-api
+    runtime: node
+    plan: free
+    region: singapore
+    rootDir: server
+    buildCommand: npm ci --omit=dev
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+      # Render injects PORT; the server reads it from the environment.
+      - key: PORT
+        value: 10000
+
+      # MongoDB Atlas SRV string for Cluster0. URL-encode the password, and
+      # allow-list Render's outbound IPs (or 0.0.0.0/0) in Atlas Network Access.
+      # The database path on the URI is ignored — MONGO_DB_NAME decides it.
+      - key: MONGO_URI
+        sync: false
+
+      # The database this service owns. Nothing else on the cluster is read
+      # or written, and the seeder refuses to clear anything but lms*.
+      - key: MONGO_DB_NAME
+        value: lms
+
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: JWT_REFRESH_EXPIRES_IN
+        value: 30d
+      - key: BCRYPT_SALT_ROUNDS
+        value: "10"
+
+      # Your deployed Vercel URL. Any *.vercel.app preview is also allowed by
+      # the CORS rule in app.js, so previews work without editing this.
+      - key: CLIENT_URL
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+
+      - key: UPLOAD_DIR
+        value: uploads
+      - key: MAX_UPLOAD_MB
+        value: "50"
+
+      - key: SEED_DEMO_PASSWORD
+        sync: false
+
+    # Uploaded files live on disk. Render's free plan has an ephemeral
+    # filesystem, so uploads are lost on redeploy — attach a disk (paid plan)
+    # or move uploads to object storage before relying on them in production.
+    # disk:
+    #   name: uploads
+    #   mountPath: /opt/render/project/src/server/uploads
+    #   sizeGB: 1
