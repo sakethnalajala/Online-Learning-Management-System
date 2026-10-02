@@ -397,7 +397,7 @@ const courses = [
           {
             title: 'Indexes, pagination and queries that scale',
             summary: 'Why your endpoint is fine at 100 rows and dead at 100,000.',
-            videoUrl: 'https://www.youtube.com/watch?v=lATuGWgqDeI',
+            videoUrl: 'https://www.youtube.com/watch?v=pKd0Rpw7O48',
             durationMinutes: 26,
             content:
               'An unindexed sort on a growing collection is a time bomb. Learn to read explain() output, understand compound index prefixes, and know why skip-based pagination degrades deep in a list.',
@@ -948,7 +948,7 @@ const courses = [
           {
             title: 'Threat modelling in one afternoon',
             summary: 'What are we building, what can go wrong, what do we do.',
-            videoUrl: 'https://www.youtube.com/watch?v=ZoxHTr5nDYs',
+            videoUrl: 'https://www.youtube.com/watch?v=inWWhr5tnEA',
             durationMinutes: 26,
             content:
               'Four questions get you most of the value: what are we building, what can go wrong, what are we going to do about it, and did we do a good job? You do not need a framework to start.',
