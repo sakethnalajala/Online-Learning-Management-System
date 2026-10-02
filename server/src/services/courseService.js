@@ -98,8 +98,6 @@ function buildCatalogueFilter(query) {
   if (query.instructor) filter.instructor = query.instructor;
   if (query.featured === 'true') filter.isFeatured = true;
 
-  if (query.price === 'free') filter.isFree = true;
-  if (query.price === 'paid') filter.isFree = false;
 
   if (query.rating) {
     const min = Number(query.rating);
@@ -121,8 +119,6 @@ const SORTS = {
   oldest: { createdAt: 1 },
   popular: { enrollmentCount: -1, ratingAverage: -1 },
   rating: { ratingAverage: -1, ratingCount: -1 },
-  'price-low': { isFree: -1, price: 1 },
-  'price-high': { price: -1 },
   title: { title: 1 },
 };
 

@@ -82,11 +82,13 @@ async function api(method, path, { token, body } = {}) {
   const search = await api('GET', '/api/courses?search=react', { token });
   check('search works', search.status === 200 && search.body.data.length > 0, `${search.body.data.length} hits for "react"`);
 
-  const free = await api('GET', '/api/courses?price=free', { token });
-  check('free filter works', free.body.data.every((c) => c.isFree === true), `${free.body.data.length} free`);
-
-  const paid = await api('GET', '/api/courses?price=paid', { token });
-  check('paid filter works', paid.body.data.every((c) => c.isFree === false), `${paid.body.data.length} paid`);
+  // Every course on the platform is free, so there is no price filter any
+  // more. What matters now is that nothing priced can appear in the catalogue.
+  check(
+    'every catalogue course is free',
+    browse.body.data.every((c) => c.isFree === true && !c.price && !c.discountPrice),
+    `${browse.body.data.length} course(s) checked`
+  );
 
   const cats = await api('GET', '/api/categories?withCounts=true');
   check('categories with counts', cats.status === 200 && cats.body.data.length > 0, `${cats.body.data.length} categories`);

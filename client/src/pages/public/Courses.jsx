@@ -13,7 +13,7 @@ import {
 } from '../../components/ui';
 import { PageHeader } from '../../components/layout/BackButton';
 
-const DEFAULTS = { search: '', category: '', level: '', price: 'all', rating: '', sort: 'newest', page: 1 };
+const DEFAULTS = { search: '', category: '', level: '', rating: '', sort: 'newest', page: 1 };
 
 /** Keeps filters in the URL so a filtered catalogue is shareable and survives reload. */
 function useFilterParams() {
@@ -24,7 +24,6 @@ function useFilterParams() {
       search: params.get('search') || '',
       category: params.get('category') || '',
       level: params.get('level') || '',
-      price: params.get('price') || 'all',
       rating: params.get('rating') || '',
       sort: params.get('sort') || 'newest',
       page: Number(params.get('page')) || 1,
@@ -72,7 +71,6 @@ export default function Courses() {
     if (filters.search) query.search = filters.search;
     if (filters.category) query.category = filters.category;
     if (filters.level) query.level = filters.level;
-    if (filters.price && filters.price !== 'all') query.price = filters.price;
     if (filters.rating) query.rating = filters.rating;
 
     try {
@@ -101,7 +99,7 @@ export default function Courses() {
         title={activeCategory ? activeCategory.name : 'All courses'}
         description={
           activeCategory?.description ||
-          'Every course here has been reviewed and published. Filter by category, level, price or rating.'
+          'Every course here has been reviewed and published, and every one is free. Filter by category, level or rating.'
         }
       />
 

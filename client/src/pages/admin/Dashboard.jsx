@@ -103,7 +103,7 @@ export default function AdminDashboard() {
 
   if (error) return <ErrorState message={error} onRetry={() => load(days)} />;
 
-  const { totals, courseStatus, approval, trends, signupsByRole, categoryBreakdown, topCourses, topInstructors, recentEnrollments, payments } = stats;
+  const { totals, courseStatus, approval, trends, signupsByRole, categoryBreakdown, topCourses, topInstructors, recentEnrollments } = stats;
 
   // Three slices only — the validated all-pairs cap for this palette.
   const userSplit = [
@@ -398,20 +398,7 @@ export default function AdminDashboard() {
         </ChartCard>
       </section>
 
-      {/* ── Paid-course honesty note ───────────────────────────────────── */}
-      {payments.pendingPaidEnrollments > 0 && (
-        <InlineAlert tone="violet" icon={ShieldCheck} title="Paid enrolments awaiting access">
-          {payments.pendingPaidEnrollments} enrolment
-          {payments.pendingPaidEnrollments === 1 ? '' : 's'} on paid courses are recorded as awaiting
-          payment, with a combined list price of ₹
-          {Number(payments.potentialRevenue).toLocaleString('en-IN')}. No payment gateway is integrated
-          in this build, so nothing has been charged — grant access manually from{' '}
-          <Link to="/admin/enrollments" className="font-bold underline">
-            Enrolments
-          </Link>{' '}
-          where appropriate.
-        </InlineAlert>
-      )}
+      {/* Every course is free, so there is no payment state to report here. */}
 
       {/* ── Leaderboards ───────────────────────────────────────────────── */}
       <section className="grid gap-5 lg:grid-cols-2">

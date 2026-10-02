@@ -8,9 +8,7 @@ import {
   COURSE_STATUS_META,
   LEVEL_META,
   compactNumber,
-  discountPercent,
   formatDuration,
-  formatOriginalPrice,
   formatPrice,
   youtubeThumb,
 } from '../../utils/format';
@@ -57,8 +55,6 @@ export default function CourseCard({ course, progress, to, showStatus = false, f
 
   const level = LEVEL_META[course.level] || LEVEL_META.beginner;
   const status = COURSE_STATUS_META[course.status];
-  const discount = discountPercent(course);
-  const original = formatOriginalPrice(course);
   const href = to || `/courses/${course.slug || course._id}`;
   const isLearning = Boolean(progress);
   const done = progress?.isCompleted || progress?.percentage === 100;
@@ -102,11 +98,8 @@ export default function CourseCard({ course, progress, to, showStatus = false, f
       <div className="flex min-w-0 flex-1 flex-col p-5">
         <div className="mb-2 flex flex-wrap items-center gap-2">
           <span className={level.className}>{level.label}</span>
-          {course.isFree ? (
-            <Badge tone="emerald">Free</Badge>
-          ) : (
-            discount && <Badge tone="rose">{discount}% off</Badge>
-          )}
+          {/* Every course is free, so this badge is unconditional. */}
+          <Badge tone="emerald">Free</Badge>
         </div>
 
         <h3 className="mb-1.5 text-base leading-snug">
@@ -160,17 +153,9 @@ export default function CourseCard({ course, progress, to, showStatus = false, f
               </Link>
             ) : (
               <div className="text-right">
-                <span
-                  className={clsx(
-                    'font-display text-base font-bold',
-                    course.isFree ? 'text-accent-emerald' : 'text-white'
-                  )}
-                >
+                <span className="font-display text-base font-bold text-accent-emerald">
                   {formatPrice(course)}
                 </span>
-                {original && (
-                  <span className="ml-1.5 text-xs text-slate-600 line-through">{original}</span>
-                )}
               </div>
             ))}
         </div>

@@ -2,16 +2,14 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import clsx from 'clsx';
-import { CheckCircle2, Layers, Lock, Search, Unlock } from 'lucide-react';
+import { CheckCircle2, Layers, Search } from 'lucide-react';
 import { enrollmentApi } from '../../api/endpoints';
 import {
   Avatar,
   Badge,
   Button,
-  ConfirmDialog,
   EmptyState,
   ErrorState,
-  InlineAlert,
   Input,
   Pagination,
   ProgressBar,
@@ -30,8 +28,6 @@ const TABS = [
 
 const PAYMENT_LABEL = {
   not_required: { label: 'Free', tone: 'badge-emerald' },
-  pending_payment: { label: 'Payment pending', tone: 'badge-amber' },
-  paid: { label: 'Paid', tone: 'badge-emerald' },
   waived: { label: 'Access granted', tone: 'badge-cyan' },
 };
 
@@ -43,8 +39,6 @@ export default function AdminEnrollments() {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [grantTarget, setGrantTarget] = useState(null);
-  const [granting, setGranting] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -69,36 +63,14 @@ export default function AdminEnrollments() {
     load();
   }, [load]);
 
-  const grant = async () => {
-    setGranting(true);
-    try {
-      await enrollmentApi.grantAccess(grantTarget._id);
-      toast.success('Access granted. The student can now open the course content.');
-      setGrantTarget(null);
-      await load();
-    } catch (err) {
-      toast.error(err.message);
-    } finally {
-      setGranting(false);
-    }
-  };
-
-  const pendingCount = rows.filter((row) => row.paymentStatus === 'pending_payment').length;
-
   return (
     <div className="space-y-7">
       <PageHeader
         backTo="/admin"
         eyebrow="Platform management"
         title="Enrolments"
-        description="Every enrolment on the platform, with live progress and payment state."
+        description="Every enrolment on the platform, with live progress. All courses are free."
       />
-
-      <InlineAlert tone="violet" icon={Lock} title="How paid courses behave in this build">
-        No payment gateway is integrated. A student can enrol in a paid course, but the enrolment is
-        recorded as <strong>payment pending</strong> and the content stays locked — nothing pretends a
-        payment happened. You can grant access manually where that is appropriate.
-      </InlineAlert>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <Tabs
@@ -125,8 +97,7 @@ export default function AdminEnrollments() {
         >
           <option value="all">All payment states</option>
           <option value="not_required">Free courses</option>
-          <option value="pending_payment">Payment pending</option>
-          <option value="waived">Access granted</option>
+            <option value="waived">Access granted</option>
         </Select>
       </div>
 
@@ -220,20 +191,6 @@ export default function AdminEnrollments() {
                           </p>
                         </td>
 
-                        <td className="text-right">
-                          {row.paymentStatus === 'pending_payment' ? (
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              icon={Unlock}
-                              onClick={() => setGrantTarget(row)}
-                            >
-                              Grant access
-                            </Button>
-                          ) : (
-                            <span className="text-2xs text-slate-600">—</span>
-                          )}
-                        </td>
                       </tr>
                     );
                   })}
@@ -248,16 +205,6 @@ export default function AdminEnrollments() {
         )}
       </div>
 
-      <ConfirmDialog
-        open={Boolean(grantTarget)}
-        onClose={() => setGrantTarget(null)}
-        onConfirm={grant}
-        loading={granting}
-        tone="primary"
-        title="Grant access to this paid course?"
-        description={`${grantTarget?.student?.name || 'This student'} will get full access to "${grantTarget?.course?.title || 'the course'}" without paying. The enrolment is recorded as "access granted" rather than "paid", so the record stays honest about what happened.`}
-        confirmLabel="Grant access"
-      />
     </div>
   );
 }

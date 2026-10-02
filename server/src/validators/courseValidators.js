@@ -1,6 +1,6 @@
 const { body, query } = require('express-validator');
 const { LEVELS, COURSE_STATUS } = require('../config/constants');
-const { objectId, paginationRules, urlOrPath, boolish } = require('./common');
+const { objectId, paginationRules, urlOrPath } = require('./common');
 
 const arrayOfShortStrings = (field, max = 200) =>
   body(field)
@@ -55,22 +55,24 @@ const courseFieldRules = ({ partial }) => {
     body('language').optional().trim().isLength({ max: 40 }),
     urlOrPath('thumbnail'),
     urlOrPath('promoVideoUrl'),
-    boolish('isFree'),
+    /*
+     * Every course on this platform is free. Rather than validating a price,
+     * the API refuses one outright: a request that tries to mark a course paid
+     * or attach a non-zero amount is rejected, so no paid course can be created
+     * through the API even if a client is modified to send one.
+     */
+    body('isFree')
+      .optional()
+      .custom((value) => value === true || value === 'true')
+      .withMessage('All courses are free; isFree cannot be false'),
     body('price')
       .optional()
-      .isFloat({ min: 0, max: 1000000 })
-      .withMessage('Price must be a positive number')
-      .toFloat(),
+      .custom((value) => Number(value) === 0)
+      .withMessage('All courses are free; price must be 0'),
     body('discountPrice')
       .optional()
-      .isFloat({ min: 0 })
-      .withMessage('Discount price must be a positive number')
-      .toFloat()
-      .custom((value, { req }) => {
-        if (!value) return true;
-        return value <= Number(req.body.price ?? 0);
-      })
-      .withMessage('Discount price cannot exceed the full price'),
+      .custom((value) => Number(value) === 0)
+      .withMessage('All courses are free; discountPrice must be 0'),
     body('currency')
       .optional()
       .isLength({ min: 3, max: 3 })
@@ -78,14 +80,6 @@ const courseFieldRules = ({ partial }) => {
     arrayOfShortStrings('tags', 40),
     arrayOfShortStrings('whatYouWillLearn'),
     arrayOfShortStrings('requirements'),
-    // A course marked paid must actually name a price.
-    body('isFree')
-      .custom((value, { req }) => {
-        const isFree = value === undefined ? undefined : value === true || value === 'true';
-        if (isFree !== false) return true;
-        return Number(req.body.price ?? 0) > 0;
-      })
-      .withMessage('Paid courses need a price greater than 0'),
   ];
 };
 
@@ -97,14 +91,10 @@ const listCourseRules = [
   query('search').optional().trim().isLength({ max: 120 }).withMessage('Search term is too long'),
   query('category').optional().isMongoId().withMessage('Invalid category filter'),
   query('level').optional().isIn(LEVELS).withMessage('Invalid level filter'),
-  query('price')
-    .optional()
-    .isIn(['free', 'paid', 'all'])
-    .withMessage('Price filter must be free, paid or all'),
   query('rating').optional().isFloat({ min: 0, max: 5 }).withMessage('Rating filter must be 0-5'),
   query('sort')
     .optional()
-    .isIn(['newest', 'oldest', 'popular', 'rating', 'price-low', 'price-high', 'title'])
+    .isIn(['newest', 'oldest', 'popular', 'rating', 'title'])
     .withMessage('Invalid sort option'),
   query('status')
     .optional()

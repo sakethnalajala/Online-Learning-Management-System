@@ -682,9 +682,6 @@ function CourseDetailsForm({ course, categories, onSaved }) {
     level: course.level || 'beginner',
     language: course.language || 'English',
     promoVideoUrl: course.promoVideoUrl || '',
-    isFree: course.isFree,
-    price: course.price || '',
-    discountPrice: course.discountPrice || '',
     tags: course.tags || [],
     whatYouWillLearn: course.whatYouWillLearn?.length ? course.whatYouWillLearn : [''],
     requirements: course.requirements?.length ? course.requirements : [''],
@@ -720,9 +717,9 @@ function CourseDetailsForm({ course, categories, onSaved }) {
         level: form.level,
         language: form.language.trim(),
         promoVideoUrl: form.promoVideoUrl.trim(),
-        isFree: form.isFree,
-        price: form.isFree ? 0 : Number(form.price) || 0,
-        discountPrice: form.isFree ? 0 : Number(form.discountPrice) || 0,
+        isFree: true,
+        price: 0,
+        discountPrice: 0,
         tags: form.tags,
         // Blank rows are the form's, not the data's.
         whatYouWillLearn: form.whatYouWillLearn.map((s) => s.trim()).filter(Boolean),
@@ -891,47 +888,14 @@ function CourseDetailsForm({ course, categories, onSaved }) {
         </Field>
       </div>
 
-      {/* Pricing */}
+      {/* Pricing — every course on Lumina is free, so there is nothing to set. */}
       <div className="surface-raised p-5 sm:p-6">
-        <h3 className="mb-4 text-base">Pricing</h3>
-
-        <Toggle
-          label="Free course"
-          description="Free courses unlock immediately on enrolment."
-          checked={form.isFree}
-          onChange={(value) => setForm({ ...form, isFree: value })}
-        />
-
-        {!form.isFree && (
-          <>
-            <div className="mt-5 grid gap-4 sm:grid-cols-2">
-              <Field label="Price (INR)" required error={errors.price}>
-                <Input
-                  type="number"
-                  min="1"
-                  value={form.price}
-                  onChange={(event) => setForm({ ...form, price: event.target.value })}
-                  required
-                  error={errors.price}
-                />
-              </Field>
-              <Field label="Discounted price" hint="Optional" error={errors.discountPrice}>
-                <Input
-                  type="number"
-                  min="0"
-                  value={form.discountPrice}
-                  onChange={(event) => setForm({ ...form, discountPrice: event.target.value })}
-                  error={errors.discountPrice}
-                />
-              </Field>
-            </div>
-
-            <InlineAlert tone="amber" className="mt-4">
-              No payment provider is integrated. Paid enrolments are recorded as awaiting payment and
-              the content stays locked until an administrator grants access.
-            </InlineAlert>
-          </>
-        )}
+        <h3 className="mb-2 text-base">Pricing</h3>
+        <p className="text-sm font-semibold text-accent-emerald">This course is free</p>
+        <p className="mt-1 text-xs text-slate-400">
+          Every course on Lumina is free. Students enrol in one click and the content unlocks
+          immediately, so there is no price, discount or payment step to configure.
+        </p>
       </div>
 
       {/* Outcomes */}

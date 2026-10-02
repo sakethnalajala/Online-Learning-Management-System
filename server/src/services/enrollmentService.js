@@ -9,9 +9,10 @@ const courseService = require('./courseService');
 /**
  * Creates an enrolment plus its progress row, or rejects the attempt.
  *
- * Paid courses: no payment provider is integrated, so a paid enrolment is
- * recorded with paymentStatus 'pending_payment' and is NOT granted content
- * access. We do not pretend money changed hands. An admin can waive it.
+ * Every course on this platform is free, so enrolment always grants access
+ * immediately. There is no payment step and no pending state to clear: an
+ * enrolment is recorded as 'free'/'not_required' regardless of what the course
+ * document says, so a stale price on a course can never lock a student out.
  */
 async function enroll({ student, course }) {
   if (course.status !== COURSE_STATUS.PUBLISHED) {
@@ -25,16 +26,14 @@ async function enroll({ student, course }) {
   const existing = await Enrollment.findOne({ student: student._id, course: course._id });
   if (existing) throw ApiError.conflict('You are already enrolled in this course.');
 
-  const paid = !course.isFree && course.effectivePrice > 0;
-
   let enrollment;
   try {
     enrollment = await Enrollment.create({
       student: student._id,
       course: course._id,
       instructor: course.instructor?._id || course.instructor,
-      accessType: paid ? 'paid' : 'free',
-      paymentStatus: paid ? 'pending_payment' : 'not_required',
+      accessType: 'free',
+      paymentStatus: 'not_required',
       amountPaid: 0,
       currency: course.currency,
     });
@@ -58,7 +57,7 @@ async function enroll({ student, course }) {
     course,
   });
 
-  return { enrollment, progress, requiresPayment: paid };
+  return { enrollment, progress, requiresPayment: false };
 }
 
 /**
@@ -76,12 +75,6 @@ async function requireAccess({ user, course, role }) {
   if (enrollment.status === 'cancelled') {
     throw ApiError.forbidden('Your enrolment in this course is no longer active.');
   }
-  if (enrollment.paymentStatus === 'pending_payment') {
-    throw ApiError.forbidden(
-      'This is a paid course and payment is still pending. Content is locked until access is granted.'
-    );
-  }
-
   const progress =
     (await Progress.findOne({ enrollment: enrollment._id })) ||
     (await progressService.initProgress({

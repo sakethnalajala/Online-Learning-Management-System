@@ -188,9 +188,11 @@ async function seedCourse(spec, { instructorsByEmail, categoriesByName, admin })
     tags: spec.tags || [],
     whatYouWillLearn: spec.whatYouWillLearn || [],
     requirements: spec.requirements || [],
-    isFree: spec.isFree !== false,
-    price: spec.isFree === false ? spec.price || 0 : 0,
-    discountPrice: spec.isFree === false ? spec.discountPrice || 0 : 0,
+    // Every course on Lumina is free. The isFree/price fields on a few specs
+    // are ignored on purpose, so a reseed cannot reintroduce a paid course.
+    isFree: true,
+    price: 0,
+    discountPrice: 0,
     currency: 'INR',
     status: spec.status || COURSE_STATUS.DRAFT,
     isFeatured: spec.isFeatured === true,

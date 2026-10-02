@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { BookMarked, Compass, Lock, Trash2 } from 'lucide-react';
+import { BookMarked, Compass, Trash2 } from 'lucide-react';
 import { enrollmentApi } from '../../api/endpoints';
 import CourseCard from '../../components/course/CourseCard';
 import {
-  Badge,
   Button,
   CardSkeletonGrid,
   ConfirmDialog,
@@ -128,20 +127,11 @@ export default function MyCourses() {
         <>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
             {rows.map((row) => {
-              const locked = row.paymentStatus === 'pending_payment';
-
               return (
                 <div key={row._id} className="relative">
                   <CourseCard
                     course={row.course}
-                    progress={locked ? undefined : row.progress}
-                    footer={
-                      locked ? (
-                        <Badge tone="amber" icon={Lock}>
-                          Access pending
-                        </Badge>
-                      ) : undefined
-                    }
+                    progress={row.progress}
                   />
 
                   <div className="mt-2 flex items-center justify-between gap-2 px-1">
@@ -154,11 +144,9 @@ export default function MyCourses() {
                           Certificate ready
                         </Link>
                       )}
-                      {!locked && (
-                        <span>
-                          {row.progress.completedLessons}/{row.progress.totalLessons} lessons
-                        </span>
-                      )}
+                      <span>
+                        {row.progress.completedLessons}/{row.progress.totalLessons} lessons
+                      </span>
                     </div>
 
                     {row.status !== 'completed' && (

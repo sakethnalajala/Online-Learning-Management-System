@@ -31,9 +31,7 @@ const enroll = asyncHandler(async (req, res) => {
   return created(
     res,
     { enrollment, progress, requiresPayment },
-    requiresPayment
-      ? 'Enrolment recorded. This is a paid course, so content unlocks once payment is completed.'
-      : `You are enrolled in "${course.title}". Happy learning!`
+    `You are enrolled in "${course.title}". Happy learning!`
   );
 });
 

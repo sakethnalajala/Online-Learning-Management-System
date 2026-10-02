@@ -3,12 +3,6 @@ import clsx from 'clsx';
 import { Search, SlidersHorizontal, X } from 'lucide-react';
 import { Button, Select } from '../ui';
 
-const PRICE = [
-  { value: 'all', label: 'All prices' },
-  { value: 'free', label: 'Free only' },
-  { value: 'paid', label: 'Paid only' },
-];
-
 const LEVELS = [
   { value: '', label: 'All levels' },
   { value: 'beginner', label: 'Beginner' },
@@ -20,8 +14,6 @@ const SORTS = [
   { value: 'newest', label: 'Newest first' },
   { value: 'popular', label: 'Most popular' },
   { value: 'rating', label: 'Highest rated' },
-  { value: 'price-low', label: 'Price: low to high' },
-  { value: 'price-high', label: 'Price: high to low' },
   { value: 'title', label: 'Title A–Z' },
 ];
 
@@ -53,13 +45,12 @@ export default function CourseFilters({ filters, onChange, categories = [], tota
   const activeCount = [
     filters.category,
     filters.level,
-    filters.price && filters.price !== 'all' ? filters.price : '',
     filters.rating,
   ].filter(Boolean).length;
 
   const clearAll = () => {
     setTerm('');
-    onChange({ search: '', category: '', level: '', price: 'all', rating: '', sort: 'newest', page: 1 });
+    onChange({ search: '', category: '', level: '', rating: '', sort: 'newest', page: 1 });
   };
 
   return (
@@ -147,18 +138,6 @@ export default function CourseFilters({ filters, onChange, categories = [], tota
           aria-label="Filter by level"
         >
           {LEVELS.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </Select>
-
-        <Select
-          value={filters.price || 'all'}
-          onChange={(event) => set({ price: event.target.value })}
-          aria-label="Filter by price"
-        >
-          {PRICE.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
             </option>

@@ -116,24 +116,6 @@ const getPlatformStats = asyncHandler(async (req, res) => {
     Progress.aggregate([{ $group: { _id: null, average: { $avg: '$percentage' } } }]),
   ]);
 
-  // Revenue is *potential*, not earned: no payment gateway is integrated, so
-  // this is the list price of paid enrolments awaiting payment.
-  const paidPending = await Enrollment.aggregate([
-    { $match: { paymentStatus: 'pending_payment' } },
-    { $lookup: { from: 'courses', localField: 'course', foreignField: '_id', as: 'course' } },
-    { $unwind: '$course' },
-    {
-      $group: {
-        _id: null,
-        count: { $sum: 1 },
-        potential: {
-          $sum: {
-            $cond: [{ $gt: ['$course.discountPrice', 0] }, '$course.discountPrice', '$course.price'],
-          },
-        },
-      },
-    },
-  ]);
 
   return ok(
     res,
@@ -185,11 +167,8 @@ const getPlatformStats = asyncHandler(async (req, res) => {
       topCourses,
       topInstructors,
       recentEnrollments,
-      payments: {
-        gatewayIntegrated: false,
-        pendingPaidEnrollments: paidPending[0]?.count || 0,
-        potentialRevenue: paidPending[0]?.potential || 0,
-      },
+      // Every course is free, so there is no revenue surface at all.
+      payments: { gatewayIntegrated: false, pendingPaidEnrollments: 0, potentialRevenue: 0 },
     },
     'Platform analytics.'
   );

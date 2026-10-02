@@ -1,9 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import clsx from 'clsx';
 import {
-  AlertCircle,
   ArrowRight,
   BarChart3,
   BookOpen,
@@ -11,7 +9,6 @@ import {
   Clock,
   Globe,
   Layers,
-  Lock,
   PlayCircle,
   Star,
   Tag,
@@ -28,7 +25,6 @@ import {
   Button,
   CheckPill,
   ErrorState,
-  InlineAlert,
   PageLoader,
   ProgressBar,
   StarRating,
@@ -38,9 +34,7 @@ import { assetUrl } from '../../api/client';
 import {
   LEVEL_META,
   compactNumber,
-  discountPercent,
   formatDuration,
-  formatOriginalPrice,
   formatPrice,
   youtubeEmbed,
   youtubeThumb,
@@ -98,11 +92,8 @@ export default function CourseDetail() {
 
   const { course, curriculum, enrollment, progress, isEnrolled, canEdit, meta } = data;
   const level = LEVEL_META[course.level] || LEVEL_META.beginner;
-  const discount = discountPercent(course);
-  const original = formatOriginalPrice(course);
   const embed = youtubeEmbed(course.promoVideoUrl);
   const poster = assetUrl(course.thumbnail) || youtubeThumb(course.promoVideoUrl);
-  const paymentPending = enrollment?.paymentStatus === 'pending_payment';
   const isOwnCourse = String(course.instructor?._id) === String(user?._id);
 
   const enroll = async () => {
@@ -117,16 +108,11 @@ export default function CourseDetail() {
 
     setEnrolling(true);
     try {
-      const result = await enrollmentApi.enroll(course._id);
-      if (result.requiresPayment) {
-        toast.success('Enrolment recorded. This is a paid course, so content stays locked until access is granted.', {
-          duration: 6500,
-        });
-      } else {
-        toast.success('You are enrolled. Happy learning!');
-      }
+      // Every course is free, so enrolment always grants access immediately.
+      await enrollmentApi.enroll(course._id);
+      toast.success('You are enrolled. Happy learning!');
       await load();
-      if (!result.requiresPayment) navigate(`/learn/${course._id}`);
+      navigate(`/learn/${course._id}`);
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -143,7 +129,7 @@ export default function CourseDetail() {
         </Link>
       );
     }
-    if (isEnrolled && !paymentPending) {
+    if (isEnrolled) {
       return (
         <Link to={`/learn/${course._id}`} className="btn-primary btn-lg w-full">
           {progress?.percentage > 0 ? 'Continue learning' : 'Start learning'}
@@ -151,16 +137,9 @@ export default function CourseDetail() {
         </Link>
       );
     }
-    if (paymentPending) {
-      return (
-        <Button size="lg" className="w-full" disabled icon={Lock}>
-          Awaiting access
-        </Button>
-      );
-    }
     return (
       <Button size="lg" className="w-full" onClick={enroll} loading={enrolling}>
-        {course.isFree ? 'Enrol for free' : `Enrol · ${formatPrice(course)}`}
+        Enrol for free
       </Button>
     );
   };
@@ -207,7 +186,7 @@ export default function CourseDetail() {
                   </span>
                 )}
                 <span className={level.className}>{level.label}</span>
-                {course.isFree && <Badge tone="emerald">Free</Badge>}
+                <Badge tone="emerald">Free</Badge>
                 {course.isFeatured && <Badge tone="amber">Featured</Badge>}
                 {canEdit && course.status !== 'published' && (
                   <Badge tone="slate">Status: {course.status}</Badge>
@@ -317,7 +296,7 @@ export default function CourseDetail() {
               {tab === 'curriculum' && (
                 <Curriculum
                   curriculum={curriculum}
-                  isEnrolled={isEnrolled && !paymentPending}
+                  isEnrolled={isEnrolled}
                   courseId={course._id}
                   completedIds={progress?.completedLessons?.map((entry) => entry.lesson) || []}
                 />
@@ -416,20 +395,13 @@ export default function CourseDetail() {
                 <div className="space-y-4 p-5">
                   {!isEnrolled && !canEdit && (
                     <div className="flex items-end gap-2.5">
-                      <span
-                        className={clsx(
-                          'font-display text-3xl font-extrabold',
-                          course.isFree ? 'text-accent-emerald' : 'text-white'
-                        )}
-                      >
+                      <span className="font-display text-3xl font-extrabold text-accent-emerald">
                         {formatPrice(course)}
                       </span>
-                      {original && <span className="pb-1 text-sm text-slate-600 line-through">{original}</span>}
-                      {discount && <Badge tone="rose" className="mb-1.5">{discount}% off</Badge>}
                     </div>
                   )}
 
-                  {isEnrolled && progress && !paymentPending && (
+                  {isEnrolled && progress && (
                     <ProgressBar
                       value={progress.percentage}
                       label="Your progress"
@@ -439,13 +411,6 @@ export default function CourseDetail() {
                   )}
 
                   {primaryAction()}
-
-                  {paymentPending && (
-                    <InlineAlert tone="amber" icon={AlertCircle}>
-                      This is a paid course. No payment provider is connected to this build, so an
-                      administrator has to grant access before the content unlocks.
-                    </InlineAlert>
-                  )}
 
                   {isOwnCourse && !canEdit && (
                     <p className="text-center text-xs text-slate-500">This is your own course.</p>

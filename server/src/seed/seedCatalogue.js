@@ -99,7 +99,12 @@ async function seedOne(spec, { instructor, category, admin }) {
   if (existing) return existing;
 
   const random = seededRandom(spec.title);
-  const isFree = !spec.price;
+  /*
+   * Every course on Lumina is free. The `price` on each catalogue entry is
+   * left in place as historical metadata but is deliberately not applied —
+   * forcing free here means no reseed can reintroduce a paid course.
+   */
+  const isFree = true;
 
   const now = Date.now();
   const course = await Course.create({

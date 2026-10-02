@@ -284,9 +284,6 @@ export default function CourseStudents() {
                             {row.percentage}%
                           </span>
                           {row.isCompleted && <Badge tone="emerald">Completed</Badge>}
-                          {row.paymentStatus === 'pending_payment' && (
-                            <Badge tone="amber">Payment pending</Badge>
-                          )}
                         </p>
                       </td>
 

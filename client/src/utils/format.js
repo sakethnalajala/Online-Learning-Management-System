@@ -1,25 +1,22 @@
 /** Display helpers shared across pages. Pure functions, no side effects. */
 
-const CURRENCY_SYMBOLS = { INR: '₹', USD: '$', EUR: '€', GBP: '£' };
+/*
+ * Every course on this platform is free, so price display is a constant.
+ *
+ * These three helpers are the only place the UI formats a price, which is why
+ * they are kept rather than deleted: every call site across the catalogue,
+ * course detail, admin and instructor pages goes through them, so returning
+ * "Free" and no strike-through or discount here is what guarantees no amount
+ * and no "% off" badge can appear anywhere.
+ */
 
-export const formatPrice = (course) => {
-  if (!course) return '';
-  if (course.isFree) return 'Free';
-  const symbol = CURRENCY_SYMBOLS[course.currency] || `${course.currency} `;
-  const price = course.discountPrice > 0 ? course.discountPrice : course.price;
-  return `${symbol}${Number(price).toLocaleString('en-IN')}`;
-};
+export const formatPrice = (course) => (course ? 'Free' : '');
 
-export const formatOriginalPrice = (course) => {
-  if (!course || course.isFree || !(course.discountPrice > 0)) return null;
-  const symbol = CURRENCY_SYMBOLS[course.currency] || `${course.currency} `;
-  return `${symbol}${Number(course.price).toLocaleString('en-IN')}`;
-};
+/** No course carries a former price to strike through. */
+export const formatOriginalPrice = () => null;
 
-export const discountPercent = (course) => {
-  if (!course || course.isFree || !(course.discountPrice > 0) || !course.price) return null;
-  return Math.round(((course.price - course.discountPrice) / course.price) * 100);
-};
+/** No course is discounted, because none is priced. */
+export const discountPercent = () => null;
 
 /** 95 -> "1h 35m", 40 -> "40m", 0 -> "—" */
 export const formatDuration = (minutes) => {

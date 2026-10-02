@@ -83,14 +83,14 @@ const loginAs = async (email) => {
   const paidNoPrice = await api('POST', '/api/courses', {
     token: instructor,
     body: {
-      title: 'Paid course with no price at all',
-      description: 'This should be rejected because a paid course needs a price above zero.',
+      title: 'Paid course that should be refused',
+      description: 'Every course is free, so the API must refuse a paid course outright.',
       category: categoryId,
       isFree: false,
-      price: 0,
+      price: 2499,
     },
   });
-  check('paid course without a price rejected', paidNoPrice.status === 422);
+  check('paid course refused — all courses are free', paidNoPrice.status === 422);
 
   const earlyPublish = await api('POST', `/api/courses/${courseId}/publish`, { token: instructor });
   check('cannot publish before approval', earlyPublish.status === 400, earlyPublish.body.message);

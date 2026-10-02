@@ -46,11 +46,14 @@ const applyWritable = (course, body) => {
   for (const field of WRITABLE) {
     if (body[field] !== undefined) course[field] = body[field];
   }
-  // A free course must not carry a stale price from when it was paid.
-  if (course.isFree) {
-    course.price = 0;
-    course.discountPrice = 0;
-  }
+  /*
+   * Every course is free, enforced here as well as in the validators. The
+   * validators reject a priced request; this makes the stored document correct
+   * regardless of what arrived, so no code path can persist a price.
+   */
+  course.isFree = true;
+  course.price = 0;
+  course.discountPrice = 0;
 };
 
 /* ── Public catalogue ────────────────────────────────────────────────────── */

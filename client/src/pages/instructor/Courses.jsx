@@ -19,7 +19,6 @@ import { assetUrl } from '../../api/client';
 import {
   Button,
   CardSkeletonGrid,
-  Checkbox,
   ConfirmDialog,
   EmptyState,
   ErrorState,
@@ -51,9 +50,6 @@ const EMPTY_FORM = {
   category: '',
   level: 'beginner',
   language: 'English',
-  isFree: true,
-  price: '',
-  discountPrice: '',
 };
 
 export default function InstructorCourses() {
@@ -131,13 +127,9 @@ export default function InstructorCourses() {
         category: form.category,
         level: form.level,
         language: form.language,
-        isFree: form.isFree,
-        ...(form.isFree
-          ? {}
-          : {
-              price: Number(form.price) || 0,
-              discountPrice: Number(form.discountPrice) || 0,
-            }),
+        isFree: true,
+        price: 0,
+        discountPrice: 0,
       };
 
       const course = await courseApi.create(payload);
@@ -485,46 +477,11 @@ export default function InstructorCourses() {
           </div>
 
           <div className="rounded-xl border border-ink-600 bg-ink-800/50 p-4">
-            <Checkbox
-              label="This is a free course"
-              description="Free courses unlock immediately on enrolment."
-              checked={form.isFree}
-              onChange={(event) => setForm({ ...form, isFree: event.target.checked })}
-            />
-
-            {!form.isFree && (
-              <>
-                <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                  <Field label="Price (INR)" required error={formErrors.price}>
-                    <Input
-                      type="number"
-                      min="1"
-                      value={form.price}
-                      onChange={(event) => setForm({ ...form, price: event.target.value })}
-                      placeholder="2499"
-                      required
-                      error={formErrors.price}
-                    />
-                  </Field>
-                  <Field label="Discounted price" hint="Optional, must be below the full price" error={formErrors.discountPrice}>
-                    <Input
-                      type="number"
-                      min="0"
-                      value={form.discountPrice}
-                      onChange={(event) => setForm({ ...form, discountPrice: event.target.value })}
-                      placeholder="1499"
-                      error={formErrors.discountPrice}
-                    />
-                  </Field>
-                </div>
-
-                <InlineAlert tone="amber" className="mt-4">
-                  No payment gateway is connected to this build. Students can enrol in a paid course,
-                  but the enrolment is recorded as awaiting payment and the content stays locked until
-                  an admin grants access. Nothing pretends a payment happened.
-                </InlineAlert>
-              </>
-            )}
+            <p className="text-sm font-semibold text-accent-emerald">This course will be free</p>
+            <p className="mt-1 text-xs text-slate-400">
+              Every course on Lumina is free. Students enrol in one click and the content
+              unlocks immediately — there is no price to set and no payment step.
+            </p>
           </div>
         </form>
       </Modal>
